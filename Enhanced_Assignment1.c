@@ -36,14 +36,22 @@ void HistogramEqualization_Static(int img[height][width], int output_img[height]
 
     // step 2: Calculating the CDF
     cdf[0] = histogram[0];
-    omp_set_num_threads(16);
-    #pragma omp parallel shared(cdf)
-        #pragma omp for
-            for (int i = 1; i < 256; i++)
+    double start[10], end[10] = {0};
+    for (int k=0; k<10; k++){
+        start[k] = omp_get_wtime();
+        for (int i = 1; i < 256; i++)
             {
-                #pragma omp critical
                     cdf[i] = cdf[i - 1] + histogram[i]; // calculating the CDF value for each intensity value, thus calculating the cdf sum for the histogram
             }
+        end[k] = omp_get_wtime();
+    }
+    double avg_s, avg_e, exec = 0;
+    for(int i=0; i<10; i++){
+        avg_s += start[i];
+        avg_e += end[i];
+    }     
+   exec = avg_e-avg_s;
+   printf("Exec time without critical: %f", exec);
 
     // Step 3: normalizing the cdf in the --255 range
     for (int i = 0; i < 256; i++)
@@ -61,7 +69,7 @@ void HistogramEqualization_Static(int img[height][width], int output_img[height]
     }
 
     // displaying the original image, the output image after histogram equalization was performed and the execution time taken for the equalization function
-    printf("Original Image:\n");
+    printf("\nOriginal Image:\n");
     for (int i = 0; i < height; i++)
     {
         for (int j = 0; j < width; j++)
