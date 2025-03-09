@@ -64,7 +64,7 @@ void HistogramEqualization_Static(int img[height][width], int output_img[height]
     }
 
     // Step 3: normalizing the cdf in the --255 range
-    omp_set_num_threads(8);
+    omp_set_num_threads(2);
     #pragma omp parallel 
     {
         #pragma omp for schedule(static)
@@ -99,20 +99,20 @@ void HistogramEqualization_Static(int img[height][width], int output_img[height]
     }
 
     printf("\nEqualized Image:\n");
-    // for (int i = 0; i < height; i++)
-    // {
-    //     for (int j = 0; j < width; j++)
-    //     {
-    //         printf("%d ", output_img[i][j]);
-    //     }
-    //     printf("\n");
-    // }
-    for(int i=0; i<256; i++){
-        printf("%d", cdf[i]);
-        if(i%24==0){
-            printf("\n");
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            printf("%d ", output_img[i][j]);
         }
+        printf("\n");
     }
+    // for(int i=0; i<256; i++){
+    //     printf("%d", cdf[i]);
+    //     if(i%24==0){
+    //         printf("\n");
+    //     }
+    // }
 }
 
 void HistogramEqualization_Dynamic(int img[height][width], int output_img[height][width])
@@ -143,7 +143,7 @@ void HistogramEqualization_Dynamic(int img[height][width], int output_img[height
     }
 
     // Step 3: normalizing the cdf in the 0-255 range
-    omp_set_num_threads(8);
+    omp_set_num_threads(2);
     #pragma omp parallel 
     {
         #pragma omp for schedule(dynamic, 16)
@@ -177,44 +177,42 @@ void HistogramEqualization_Dynamic(int img[height][width], int output_img[height
     }
 
     printf("\nEqualized Image:\n");
-    // for (int i = 0; i < height; i++)
-    // {
-    //     for (int j = 0; j < width; j++)
-    //     {
-    //         printf("%d ", output_img[i][j]);
-    //     }
-    //     printf("\n");
-    // }
-    for(int i=0; i<256; i++){
-        printf("%d", cdf[i]);
-        if(i%24==0){
-            printf("\n");
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            printf("%d ", output_img[i][j]);
         }
+        printf("\n");
     }
+    // for(int i=0; i<256; i++){
+    //     printf("%d", cdf[i]);
+    //     if(i%24==0){
+    //         printf("\n");
+    //     }
+    // }
 }
 
 
 int main()
 {
     int output_img[height][width], output_image[height][width];
-    struct timespec start, end;
+    struct timespec start1, end1;
 
     printf("Parallelization Implemented Using Static Loop Scheduling:");
-    clock_gettime(CLOCK_MONOTONIC, &start); // calculating the starting time of the execution
+    clock_gettime(CLOCK_MONOTONIC, &start1); // calculating the starting time of the execution
     HistogramEqualization_Static(image, output_img);
-    clock_gettime(CLOCK_MONOTONIC, &end); // calculating the ending time of the execution
-    double execution_time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+    clock_gettime(CLOCK_MONOTONIC, &end1); // calculating the ending time of the execution
+    double execution_time1 = (end1.tv_sec - start1.tv_sec) + (end1.tv_nsec - start1.tv_nsec) / 1e9;
+    printf("\nExecution Time With Static Loop Scheduling: %f seconds\n", execution_time1);
 
-    printf("\nExecution Time With Static Loop Scheduling: %f seconds\n", execution_time);
-
-    // printf("\nParallelization Implemented Using Dynamic Loop Scheduling:");
-    // clock_gettime(CLOCK_MONOTONIC, &start); // calculating the starting time of the execution
+    struct timespec start2, end2;
+    printf("\nParallelization Implemented Using Dynamic Loop Scheduling:");
+    clock_gettime(CLOCK_MONOTONIC, &start2); // calculating the starting time of the execution
     HistogramEqualization_Dynamic(image, output_image);
-    // clock_gettime(CLOCK_MONOTONIC, &end); // calculating the ending time of the execution
-
-    // execution_time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
-
-    // printf("\nExecution Time with Dynamic Loop Scheduling: %f seconds\n", execution_time);
+    clock_gettime(CLOCK_MONOTONIC, &end2); // calculating the ending time of the execution
+    double execution_time2 = (end2.tv_sec - start2.tv_sec) + (end2.tv_nsec - start2.tv_nsec) / 1e9;
+    printf("\nExecution Time With Static Loop Scheduling: %f seconds\n", execution_time2);
 
     return 0;
 }
