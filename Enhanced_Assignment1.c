@@ -148,16 +148,25 @@ void HistogramEqualization_Dynamic(int img[height][width], int output_img[height
 
 int main()
 {
-    int output_img[height][width];
+    int output_img[height][width], output_image[height][width];
     struct timespec start, end;
 
+    printf("Parallelization Implemented Using Static Loop Scheduling:");
     clock_gettime(CLOCK_MONOTONIC, &start); // calculating the starting time of the execution
-    HistogramEqualization_Dynamic(image, output_img);
+    HistogramEqualization_Static(image, output_img);
     clock_gettime(CLOCK_MONOTONIC, &end); // calculating the ending time of the execution
-
     double execution_time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
 
-    printf("\nExecution Time: %f seconds\n", execution_time);
+    printf("\nExecution Time With Static Loop Scheduling: %f seconds\n", execution_time);
+
+    printf("\nParallelization Implemented Using Dynamic Loop Scheduling:");
+    clock_gettime(CLOCK_MONOTONIC, &start); // calculating the starting time of the execution
+    HistogramEqualization_Dynamic(image, output_image);
+    clock_gettime(CLOCK_MONOTONIC, &end); // calculating the ending time of the execution
+
+    execution_time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+
+    printf("\nExecution Time with Dynamic Loop Scheduling: %f seconds\n", execution_time);
 
     return 0;
 }
