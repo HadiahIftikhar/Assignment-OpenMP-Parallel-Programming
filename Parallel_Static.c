@@ -55,10 +55,9 @@ void HistogramEqualization_Static(int **img, int **output_img, int height, int w
     }
 
     // Step 3: normalizing the cdf in the 0-255 range
-    #pragma omp parallel for schedule(static)
-        for (int i = 0; i < 256; i++){
-            cdf[i] = (cdf[i] - cdf[0]) * 255 / (total_pixels - 1);
-        }
+    for (int i = 0; i < 256; i++){
+        cdf[i] = (cdf[i] - cdf[0]) * 255 / (total_pixels - 1);
+    }
 
     // step 4: Mapping the normalized values to the respective pixel using the output image
     #pragma omp parallel for collapse(2) schedule(static)
