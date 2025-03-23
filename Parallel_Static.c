@@ -18,7 +18,6 @@ void generateRandomImage(int **image, int height, int width) {
     }
 }
 
-
 // Function to print a subset of the image for verification
 void printImageSubset(int **image, int height, int width, const char* label) {
     printf("%s (showing top-left 5x5 corner):\n", label);
@@ -32,16 +31,16 @@ void printImageSubset(int **image, int height, int width, const char* label) {
     printf("\n");
 }
 
-
 // creating the histogram equalization function
-void HistogramEqualization_Static(int **img, int **output_img, int height, int width)
+void HistogramEqualization_Static(int **img, int **output_img, int height, int width, int threads)
 {
     int histogram[256] = {0}; 
     int cdf[256] = {0};       
     int total_pixels = width * height;
 
+    omp_set_num_threads(threads);
     // Step 1: Using multiple threads to fill the histogram array with pixel values, used static loop scheduling, and for, collapse and reduction directives 
-    #pragma omp parallel for reduction(+: histogram[:256]) collapse(2) schedule(static)
+    #pragma omp parallel for reduction(+: histogram[:256]) collapse(2) schedule(static, 4000)
         for (int i = 0; i < height; i++){
             for (int j = 0; j < width; j++){
                 histogram[img[i][j]]++; // traversing through the image matrix and incrementing the value of the corresponding index in the histogram for each pixel value in the matrix
@@ -60,7 +59,7 @@ void HistogramEqualization_Static(int **img, int **output_img, int height, int w
     }
 
     // step 4: Mapping the normalized values to the respective pixel using the output image
-    #pragma omp parallel for collapse(2) schedule(static)
+    #pragma omp parallel for collapse(2) schedule(static, 4000)
         for (int i = 0; i < height; i++){
             for (int j = 0; j < width; j++){
                 output_img[i][j] = cdf[img[i][j]];
@@ -68,12 +67,11 @@ void HistogramEqualization_Static(int **img, int **output_img, int height, int w
         }
 }
 
-
-
-int main()
+int main(int argc, char* argv[])
 {
     int width = def_width;
     int height = def_height;
+    int nthreads = atoi(argv[1]);
     
     printf("Processing image of size %dx%d\n", width, height);
 
@@ -93,7 +91,7 @@ int main()
     
     // Measure execution time for histogram equalization
     double start = omp_get_wtime();
-    HistogramEqualization_Static(image, output_img, height, width);
+    HistogramEqualization_Static(image, output_img, height, width, nthreads);
     double end = omp_get_wtime();
     printf("Parallel Execution Time: %f seconds\n", end - start);
     
